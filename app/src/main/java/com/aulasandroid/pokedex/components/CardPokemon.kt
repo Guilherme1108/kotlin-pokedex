@@ -23,13 +23,14 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.aulasandroid.pokedex.R
 import com.aulasandroid.pokedex.model.Pokemon
+import com.aulasandroid.pokedex.model.PokemonDetails
 
 @Composable
-fun CardPokemon(pokemon: Pokemon) {
+fun CardPokemon(pokemon: PokemonDetails) {
 
-    val id = pokemon.url.split("/").filter { it.isNotEmpty() }.last()
+//    val id = pokemon.url.split("/").filter { it.isNotEmpty() }.last()
 
-    val imageUrl = "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/$id.png"
+    val imageUrl = "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${pokemon.id}.png"
 
 
     Card(
@@ -54,28 +55,28 @@ fun CardPokemon(pokemon: Pokemon) {
                 horizontalArrangement = Arrangement.End,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(text = "#${id}")
+                Text(text = "#${pokemon.id}")
             }
 
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(100.dp)
-                    .background(Color.Blue),
+                    .height(100.dp),
                 horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-//                AsyncImage(
-//                    imageUrl = imageUrl,
-//                    contentDescription = "pokemon"
-//                )
+                AsyncImage(
+                    model = imageUrl,
+                    contentDescription = "pokemon",
+                    modifier = Modifier
+                        .fillMaxSize()
+                )
             }
 
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(30.dp)
-                    .background(Color.Red),
+                    .height(30.dp),
                 horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.CenterVertically
             ) {

@@ -20,6 +20,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -37,6 +38,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -49,6 +51,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.aulasandroid.pokedex.R
 import com.aulasandroid.pokedex.components.CardPokemon
+import kotlinx.coroutines.flow.collect
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -58,8 +61,23 @@ fun PokedexScreen(modifier: Modifier = Modifier, pokedexScreenViewModel: Pokedex
 
     var pokemonState by remember { mutableStateOf("") }
 
+    val gridState = rememberLazyGridState()
+
     LaunchedEffect(Unit) {
         pokedexScreenViewModel.getPokemons()
+    }
+
+    LaunchedEffect(gridState) {
+        snapshotFlow { gridState.layoutInfo }
+            .collect { layoutInfo ->
+
+                val total = layoutInfo.totalItemsCount
+                val lastVisible = layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0
+
+                if (lastVisible >= total - 5) {
+                    pokedexScreenViewModel.getPokemons()
+                }
+            }
     }
 
 
@@ -126,16 +144,21 @@ fun PokedexScreen(modifier: Modifier = Modifier, pokedexScreenViewModel: Pokedex
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            val pokemons = pokedexScreenViewModel.listaPokemons.value
+            val pokemons = pokedexScreenViewModel.listaPokemonsDetails.value
 
-            LazyVerticalGrid(
-                columns = GridCells.Adaptive(100.dp),
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                items(pokemons) { pokemon ->
-                    Log.i("TESTE", "${pokemons}")
-                    CardPokemon(pokemon)
+            if (pokemons.isEmpty()) {
+                Text("Carregando...")
+            } else {
+                LazyVerticalGrid(
+                    state = gridState,
+                    columns = GridCells.Adaptive(100.dp),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    items(pokemons) { pokemon ->
+                        Log.i("TESTE", "${pokemons}")
+                        CardPokemon(pokemon)
+                    }
                 }
             }
 

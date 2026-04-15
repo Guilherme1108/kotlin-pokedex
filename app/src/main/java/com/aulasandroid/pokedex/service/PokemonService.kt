@@ -1,5 +1,6 @@
 package com.aulasandroid.pokedex.service
 
+import androidx.compose.ui.geometry.Offset
 import com.aulasandroid.pokedex.model.Pokemon
 import com.aulasandroid.pokedex.model.PokemonDetails
 import com.aulasandroid.pokedex.model.PokemonResponse
@@ -13,13 +14,14 @@ import retrofit2.http.Url
 
 interface PokemonService {
     @GET("pokemon")
-    fun getPokemon(
-        @Query("limit") limit: Int = 1025
-    ): Call<PokemonResponse>
+    suspend fun getPokemon(
+        @Query("limit") limit: Int = 20,
+        @Query("offset") offset: Int = 0
+    ): PokemonResponse
 
     @GET
-    fun getPokemonDetailsByUrl(
+    suspend fun getPokemonDetailsByUrl(
         @Url url: String
-    ): Call<PokemonDetails>
+    ): PokemonDetails
 
 }

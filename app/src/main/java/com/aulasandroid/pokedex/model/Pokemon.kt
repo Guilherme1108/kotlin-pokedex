@@ -6,7 +6,6 @@ data class Pokemon (
 )
 
 data class PokemonDetails (
-    val id: Int = 0,
-    val image: String = "",
-    val name: String = ""
+    val id: Int,
+    val name: String
 )
