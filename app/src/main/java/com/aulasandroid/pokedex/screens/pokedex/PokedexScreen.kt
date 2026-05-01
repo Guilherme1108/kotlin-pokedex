@@ -1,11 +1,8 @@
 package com.aulasandroid.pokedex.screens.pokedex
 
 import android.util.Log
-import android.widget.Space
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -16,17 +13,13 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
@@ -42,19 +35,12 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Vertices
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.KeyboardCapitalization
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.aulasandroid.pokedex.R
 import com.aulasandroid.pokedex.components.CardPokemon
-import kotlinx.coroutines.flow.collect
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
 
 @Composable
 fun PokedexScreen(modifier: Modifier = Modifier, pokedexScreenViewModel: PokedexScreenViewModel) {
@@ -74,7 +60,7 @@ fun PokedexScreen(modifier: Modifier = Modifier, pokedexScreenViewModel: Pokedex
                 val total = layoutInfo.totalItemsCount
                 val lastVisible = layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0
 
-                if (lastVisible >= total - 5) {
+                if (lastVisible >= total - 6) {
                     pokedexScreenViewModel.getPokemons()
                 }
             }
@@ -83,7 +69,8 @@ fun PokedexScreen(modifier: Modifier = Modifier, pokedexScreenViewModel: Pokedex
 
     Column(
         modifier = modifier
-            .fillMaxSize(),
+            .fillMaxSize()
+            .background(Color.White),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Row(

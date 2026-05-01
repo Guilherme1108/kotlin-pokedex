@@ -5,7 +5,18 @@ data class Pokemon (
     val url: String = ""
 )
 
-data class PokemonDetails (
+data class PokemonDetails(
     val id: Int,
-    val name: String
+    val name: String,
+    val types: List<PokemonTypeSlot>
+)
+
+data class PokemonTypeSlot(
+    val slot: Int,
+    val type: TypeInfo
+)
+
+data class TypeInfo(
+    val name: String,
+    val url: String
 )

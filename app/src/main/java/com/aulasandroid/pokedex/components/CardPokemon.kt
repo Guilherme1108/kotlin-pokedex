@@ -24,14 +24,15 @@ import coil.compose.AsyncImage
 import com.aulasandroid.pokedex.R
 import com.aulasandroid.pokedex.model.Pokemon
 import com.aulasandroid.pokedex.model.PokemonDetails
+import com.aulasandroid.pokedex.utils.pokemonColor
 
 @Composable
 fun CardPokemon(pokemon: PokemonDetails) {
 
-//    val id = pokemon.url.split("/").filter { it.isNotEmpty() }.last()
+    val imageUrl = "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${pokemon.id}.png"
 
-    val imageUrl = "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${pokemon.id}.png"
-
+    val typeName = pokemon.types.firstOrNull()?.type?.name
+    val color = pokemonColor(typeName)
 
     Card(
         modifier = Modifier
@@ -39,7 +40,7 @@ fun CardPokemon(pokemon: PokemonDetails) {
         colors = CardDefaults.cardColors(
             containerColor = Color(255, 255, 255)
         ),
-        border = BorderStroke(1.dp, Color(137,200,90)),
+        border = BorderStroke(1.dp, color),
     ) {
 
         Column(
@@ -55,7 +56,10 @@ fun CardPokemon(pokemon: PokemonDetails) {
                 horizontalArrangement = Arrangement.End,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(text = "#${pokemon.id}")
+                Text(
+                    text = "#${pokemon.id}",
+                    color = color
+                )
             }
 
             Row(
@@ -76,7 +80,8 @@ fun CardPokemon(pokemon: PokemonDetails) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(30.dp),
+                    .height(30.dp)
+                    .background(color),
                 horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.CenterVertically
             ) {

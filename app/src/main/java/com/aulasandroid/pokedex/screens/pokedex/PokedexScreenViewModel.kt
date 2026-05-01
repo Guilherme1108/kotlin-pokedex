@@ -1,78 +1,78 @@
 package com.aulasandroid.pokedex.screens.pokedex
 
 import android.util.Log
-import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.lifecycle.ViewModel
-import com.aulasandroid.pokedex.model.Pokemon
-import com.aulasandroid.pokedex.service.RetrofitFactory
-import kotlinx.coroutines.launch
-import retrofit2.Call
-import retrofit2.Callback
 import androidx.lifecycle.viewModelScope
+import com.aulasandroid.pokedex.model.Pokemon
 import com.aulasandroid.pokedex.model.PokemonDetails
+import com.aulasandroid.pokedex.service.RetrofitFactory
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlin.math.log
+import kotlinx.coroutines.launch
 
 class PokedexScreenViewModel : ViewModel() {
 
     private val limit = 20
     private var currentOffset = 0
 
-    val listaPokemons = mutableStateOf<List<Pokemon>>(emptyList())
+    private var isFetching = false
 
-    val listaPokemonsDetails = mutableStateOf<List<PokemonDetails>>(emptyList())
+    private val pokemonService = RetrofitFactory().getPokemonService()
+
+    private val _listaPokemonsDetails = mutableStateOf<List<PokemonDetails>>(emptyList())
+    val listaPokemonsDetails: State<List<PokemonDetails>> = _listaPokemonsDetails
 
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
 
-    fun getPokemons(){
-        if (_isLoading.value) return
+    fun getPokemons() {
+        if (isFetching) return
 
         viewModelScope.launch {
-            _isLoading.value = true
+            try {
+                isFetching = true
+                _isLoading.value = true
 
-                try {
-                    val response = RetrofitFactory()
-                        .getPokemonService()
-                        .getPokemon(limit = limit, offset = currentOffset)
-                        .results
+                val response = pokemonService.getPokemon(
+                    limit = limit,
+                    offset = currentOffset
+                ).results
 
-                    listaPokemons.value = listaPokemons.value + response
-
-                    Log.i("TESTE", "Lista carregada: ${response.size}")
+                if (response.isNotEmpty()) {
+                    fetchDetailsAndAppend(response)
 
                     currentOffset += limit
-                    getPokemonDetails(response)
-
-                } catch (e: Exception) {
-                    Log.e("ERROR", e.message ?: "")
-                } finally {
-                    _isLoading.value = false
                 }
 
-
+            } catch (e: Exception) {
+                Log.e("POKEDEX", "Erro ao carregar lista: ${e.message}")
+            } finally {
+                _isLoading.value = false
+                isFetching = false
+            }
         }
     }
 
-    fun getPokemonDetails(novosPokemons: List<Pokemon>) {
-        viewModelScope.launch {
-            try {
-
-                val detalhes = novosPokemons.map { pokemon ->
-                    RetrofitFactory()
-                        .getPokemonService()
-                        .getPokemonDetailsByUrl(pokemon.url)
-                }
-
-                listaPokemonsDetails.value = detalhes
-
-            } catch (e: Exception) {
-                Log.e("ERROR", e.message ?: "")
+    private suspend fun fetchDetailsAndAppend(novosPokemons: List<Pokemon>) {
+        try {
+            val novosDetalhes = coroutineScope {
+                novosPokemons.map { pokemon ->
+                    async {
+                        pokemonService.getPokemonDetailsByUrl(pokemon.url)
+                    }
+                }.awaitAll()
             }
+
+            _listaPokemonsDetails.value = _listaPokemonsDetails.value + novosDetalhes
+
+        } catch (e: Exception) {
+            Log.e("POKEDEX", "Erro ao carregar detalhes: ${e.message}")
         }
     }
 }
